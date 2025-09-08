@@ -43,13 +43,13 @@ extern "C" {
 
 BlynkTimer edgentTimer;
 
-#include "BlynkState.h"
+#include "BlynkkkState.h"
 #include "ConfigStore.h"
-#include "ResetButton.h"
 #include "ConfigMode.h"
 #include "Indicator.h"
-#include "OTA.h"
+#include "ResetBtn.h"
 #include "Console.h"
+#include "OTAAAA.h"
 
 
 inline
@@ -152,4 +152,3 @@ void app_loop() {
     edgentTimer.run();
     edgentConsole.run();
 }
-

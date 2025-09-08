@@ -91,15 +91,23 @@ String formatTimestamp(unsigned long epoch)
           hour(epoch), minute(epoch), second(epoch));
   return String(buf);}
 
+unsigned long toSeconds(unsigned long value, int unit) 
+ 
+ {if (unit == 0) return value;           // seconds
+  if (unit == 1) return value * 60UL;     // minutes
+  if (unit == 2) return value * 3600UL;    // hoursss
+  if (unit == 3) return value * 86400UL;    // dayssss
+  if (unit == 4) return value * 604800UL;    // weeksss
+  if (unit == 5) return value * 2419200UL;    // monthss
+  if (unit == 6) return value * 29030400UL;    // yearsss
+  return value;}
 
-// ------------------ Forward declarations ------------------ //
+// --------------------- Forward declarations --------------------- //
 
-void SendTimer();
 void RequestTime();
 void AutoRunMode();
 void ManualRunMode();
 void RestoreTimeCycle();
-void SaveCycleState(unsigned long, int);
 
 ///////////////////////////////////////////////////////////////////////
 ///////////// ---------- Virtual Pins Handlers ---------- /////////////
@@ -177,19 +185,6 @@ BLYNK_WRITE(V12)   // Dropdown for OffDuration unit
 
  {BlynkNote = param.asInt();}*/
 
-
-
-unsigned long toSeconds(unsigned long value, int unit) 
- 
- {if (unit == 0) return value;           // seconds
-  if (unit == 1) return value * 60UL;     // minutes
-  if (unit == 2) return value * 3600UL;    // hoursss
-  if (unit == 3) return value * 86400UL;    // dayssss
-  if (unit == 4) return value * 604800UL;    // weeksss
-  if (unit == 5) return value * 2419200UL;    // monthss
-  if (unit == 6) return value * 29030400UL;    // yearsss
-  return value;}
-
 ///////////////////////////////////////////////////////////////////////
 /////////////// ---------- Tiime Sync Handler ---------- //////////////
 ///////////////////////////////////////////////////////////////////////
@@ -225,23 +220,22 @@ void setup()
   OnnDuration = EEPROM.read(addrOnnDuration);
   OffDuration = EEPROM.read(addrOffDuration);
 
-  Serial.println("[EEPROM] Loaded values:");
+  Serial.println("---------[EEPROM] Loaded values---------");
   Serial.print("  AutoManual: "); Serial.println(AutoManual);
   Serial.print("  RelayState: "); Serial.println(RelayState);
   Serial.print("  OnnDuration: "); Serial.println(OnnDuration);
   Serial.print("  OffDuration: "); Serial.println(OffDuration);
 
   OnnUnit  = EEPROM.read(addrOnnUnit);
-  if (OnnUnit > 6) OnnUnit = 1;   // safety default minutes
+  if (OnnUnit > 3) OnnUnit = 1;   // safety default minutes
 
   OffUnit = EEPROM.read(addrOffUnit);
-  if (OffUnit > 6) OffUnit = 1;
+  if (OffUnit > 3) OffUnit = 1;
 
   if (RelayState)
      {digitalWrite(MotorPin, HIGH);
       MoterState = HIGH;}
 
-  // edgentTimer.setInterval(1000L, SendTimer);
   edgentTimer.setInterval(1000L, RequestTime);}
 
 ///////////////////////////////////////////////////////////////////////
@@ -250,13 +244,8 @@ void setup()
 
 void loop()
  
- {// timer.run();
-  // Blynk.run();
-  
-  BlynkEdgent.run();
-  
+ {BlynkEdgent.run();
   currentMillis = millis();
-
   if (AutoManual == 1)
      {AutoRunMode();}
   else
